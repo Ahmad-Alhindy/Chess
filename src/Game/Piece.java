@@ -6,6 +6,7 @@ public class Piece {
 	int yPossition;
 	PieceType piceType = new PieceType();
 	String type = "";
+	String Pawn = "♟";
 	
 	protected String pType (int type) {
 		if (type >= 0 && type <= 9) {

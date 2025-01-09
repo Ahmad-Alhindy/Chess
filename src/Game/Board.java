@@ -23,7 +23,6 @@ public class Board {
 				}
 				System.out.println();
 			}
-	}
 
 	public void addPices() {
 		for (int i=1; i<9; ++i) {

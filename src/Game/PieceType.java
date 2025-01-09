@@ -1,7 +1,7 @@
 package Game;
 
 public class PieceType {
-	String type = "";
+	
 	protected static final String[] PIECES = {
 		    "♟",  // Black Pawn
 		    "♜", // Black Rook
@@ -13,8 +13,4 @@ public class PieceType {
 		    "♞", // Black Knight
 		    "♜", // Black Rook
 		};
-	
-	
-	
-
 }

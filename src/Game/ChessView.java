@@ -53,13 +53,13 @@ public class ChessView extends JFrame{
           board.addPices();
           for (Piece p : board.pieceList) {
         	  int xPos = p.xPossition * Width - Width + 3;
-        	  int yPos = p.yPossition * hight + hight - 10;
+        	  int yPos = p.yPossition * hight - 5 ;
               String pieceSymbol = p.type;
         	  g.setFont(new Font("TimesRoman", Font.PLAIN, (int) Math.floor(Width * 0.8)));
-              g.setColor(p.team == Team.WHITE ? Color.blue : Color.black); // Different color for teams      
+              g.setColor(p.team == Team.WHITE ? Color.blue : Color.RED); // Different color for teams      
               g.drawString(pieceSymbol, xPos, yPos);  // Adjust for centering
               System.out.println("Piece: " + p.type + " at (x" + xPos + ", y" + yPos + ")");
-
+              System.out.println("Piece: " + p.type + "xPossition " + p.xPossition + "p.yPossition " + p.yPossition);
             }
             
         }
