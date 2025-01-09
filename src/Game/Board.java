@@ -45,7 +45,7 @@ public class Board {
 			Piece p = new Piece();
 			p.xPossition = i;
 			p.yPossition = 2;
-			p.type = p.Pawn;
+			p.pType(0);
 			p.team = Team.WHITE;
 			pieceList.add(p);	
 		}
@@ -53,7 +53,7 @@ public class Board {
 			Piece p = new Piece();
 			p.xPossition = i;
 			p.yPossition = 7;
-			p.type = p.Pawn;
+			p.pType(0);
 			p.team = Team.BLACK;
 			pieceList.add(p);	
 		}

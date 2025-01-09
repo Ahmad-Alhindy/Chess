@@ -27,8 +27,6 @@ public class ChessView extends JFrame{
     
 	private static class ChessBoard extends JPanel { //ChessBord will draw the board
 		Board board = new Board();
-		Team team;
-		Piece pice;
         @Override
 		protected void paintComponent(Graphics g) { // it used as the paint method 
            
