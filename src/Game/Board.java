@@ -23,14 +23,38 @@ public class Board {
 				}
 				System.out.println();
 			}
-
+	}	
 	public void addPices() {
 		for (int i=1; i<9; ++i) {
 			Piece p = new Piece();
 			p.xPossition = i;
-			p.yPossition = 0;
+			p.yPossition = 1;
 			p.pType(i);
 			p.team = Team.WHITE;
+			pieceList.add(p);	
+		}
+		for (int i=1; i<9; ++i) {
+			Piece p = new Piece();
+			p.xPossition = i;
+			p.yPossition = 8;
+			p.pType(i);
+			p.team = Team.BLACK;
+			pieceList.add(p);	
+		}
+		for (int i=1; i<9; ++i) {
+			Piece p = new Piece();
+			p.xPossition = i;
+			p.yPossition = 2;
+			p.type = p.Pawn;
+			p.team = Team.WHITE;
+			pieceList.add(p);	
+		}
+		for (int i=1; i<9; ++i) {
+			Piece p = new Piece();
+			p.xPossition = i;
+			p.yPossition = 7;
+			p.type = p.Pawn;
+			p.team = Team.BLACK;
 			pieceList.add(p);	
 		}
 	}
