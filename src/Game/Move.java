@@ -55,12 +55,12 @@ public class Move extends MouseAdapter {
 					int[] square = iterator.next();
 					int row = square[0];
 					int col = square[1];    
-					Color previousColor = previousColors.get(previousColors.size() - 1);
+					Color previousColor = previousColors.get(0);
 					// Repaint the square back to the previous color
 					chessView.updateSquareColor(col, row, previousColor);
 
 					// Remove the last stored color
-					previousColors.remove(previousColors.size() - 1);
+					previousColors.remove(0);
 					iterator.remove();
 				}
 			}
@@ -74,6 +74,7 @@ public class Move extends MouseAdapter {
 
 	private void showLegalMoves(int row , int col , String clickedPiece) {
 		if (clickedPiece == "♟") {
+			this.legalMove.add(new int[]{row , col});
 			this.legalMove.add(new int[]{row + 1 , col});
 
 		}
