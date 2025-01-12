@@ -15,7 +15,8 @@ public class ChessView extends JFrame{
 	
 	int Width = 0;
 	int hight = 0;
-	private Color[][] squareColors = new Color[8][8];
+	boolean listnerAdedd = false;
+	protected Color[][] squareColors = new Color[8][8];
 	
     public ChessView() {
     	
@@ -34,7 +35,7 @@ public class ChessView extends JFrame{
     }
     
     public void updateSquareColor(int row, int col, Color color) {
-    	System.out.println("Square at (" + row + ", " + col + ") updated to " + color);
+    	System.out.println("updateSquareColor Square at (" + row + ", " + col + ") updated to " + color);
         squareColors[row][col] = color; // Update the color
         repaint(row , col , this.Width, this.hight);	    	
     }	
@@ -51,6 +52,8 @@ public class ChessView extends JFrame{
 		    this.chessView = chessView;
 		}
 		
+		
+		
         @Override
 		protected void paintComponent(Graphics g) { // it used as the paint method 
            
@@ -58,8 +61,12 @@ public class ChessView extends JFrame{
         	chessView.Width = getWidth() / 8; // calculate the width of one square
         	chessView.hight = getHeight() / 8;
             
+        	if (chessView.listnerAdedd == false) {
             Move listener = new Move(board, chessView, chessView.Width, chessView.hight);
             addMouseListener(listener);
+            chessView.listnerAdedd = true;
+        	}
+            
 
             for (int i = 0; i < 8; i++) {
                 for (int j = 0; j < 8; j++) {
