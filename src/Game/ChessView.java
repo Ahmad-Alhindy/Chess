@@ -35,10 +35,27 @@ public class ChessView extends JFrame{
     }
     
     public void updateSquareColor(int row, int col, Color color) {
-    	System.out.println("updateSquareColor Square at (" + row + ", " + col + ") updated to " + color);
+    	//System.out.println("updateSquareColor Square at (" + row + ", " + col + ") updated to " + color);	
+    	if (color == Color.CYAN) {
         squareColors[row][col] = color; // Update the color
-        repaint(row , col , this.Width, this.hight);	    	
-    }	
+        repaint(row , col , this.Width, this.hight);
+       // System.out.println("color is " + color);
+    	}
+    	else {
+    		 for (int i = 0; i < 8; i++) {
+                 for (int j = 0; j < 8; j++) {
+                 	squareColors[i][j] = (i + j) % 2 == 0 ? Color.WHITE : Color.BLACK;
+                 }
+    		 }
+        	 repaint();  
+        	 System.out.println("repaint is done");
+    	}
+    	
+    }
+    
+    
+    
+    
     
     
     
