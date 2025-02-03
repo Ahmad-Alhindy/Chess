@@ -3,18 +3,7 @@ package Game;
 import java.util.ArrayList;
 
 public class Board {
-	protected String[][] board = {
-		    {"♜", "♞", "♝", "♛", "♚", "♝", "♞", "♜"},
-		    {"♟", "♟", "♟", "♟", "♟", "♟", "♟", "♟"},
-		    {null, null, null, null, null, null, null, null},
-		    {null, null, null, null, null, null, null, null},
-		    {null, null, null, null, null, null, null, null},
-		    {null, null, null, null, null, null, null, null},
-		    {"♙", "♙", "♙", "♙", "♙", "♙", "♙", "♙"},
-		    {"♖", "♘", "♗", "♕", "♔", "♗", "♘", "♖"}
-		};
-	Piece pice; 
-	ArrayList<Piece> pieceList = new ArrayList<Piece>();
+	protected Piece[][] board = new Piece[8][8];  // 8x8 board to hold Piece objects
 	
 	
 	public Board() {}
@@ -22,7 +11,14 @@ public class Board {
 	public void boardPrinter() {
 			for (int i = 0; i < 8; ++i) {
 				for (int j = 0; j < 8; ++j) {
-					System.out.print(i + "" + j + " ");
+					if (board[i][j] != null) {
+					System.out.print(board[i][j].type + " ");
+					}
+					else {
+						System.out.print("null");
+
+					}
+					
 				}
 				System.out.println();
 			}
@@ -30,35 +26,38 @@ public class Board {
 	
 	
 	public void addPices() {
-		for (int i=1; i<9; ++i) {
+		for (int i=0; i<8; ++i) {
 			Piece pWhite = new Piece();
 			pWhite.xPossition = i;
-			pWhite.yPossition = 1;
+			pWhite.yPossition = 0;
 			pWhite.pType(i);
 			pWhite.team = Team.WHITE;
-			pieceList.add(pWhite);	
-			
-			Piece pBlack = new Piece();
-			pBlack.xPossition = i;
-			pBlack.yPossition = 8;
-			pBlack.pType(i);
-			pBlack.team = Team.BLACK;
-			pieceList.add(pBlack);
+			board[pWhite.yPossition][pWhite.xPossition] = pWhite;	
 			
 			Piece pPawnW = new Piece();
 			pPawnW.xPossition = i;
-			pPawnW.yPossition = 2;
-			pPawnW.pType(0);
+			pPawnW.yPossition = 1;
+			pPawnW.type = "♟";
 			pPawnW.team = Team.WHITE;
-			pieceList.add(pPawnW);	
+			board[pPawnW.yPossition][pPawnW.xPossition] = pPawnW;	
+
+			
+			Piece pBlack = new Piece();
+			pBlack.xPossition = i;
+			pBlack.yPossition = 7;
+			pBlack.pType(i);
+			pBlack.team = Team.BLACK;
+			board[pBlack.yPossition][pBlack.xPossition] = pBlack;	
+			
 			
 			Piece pPawnB = new Piece();
 			pPawnB.xPossition = i;
-			pPawnB.yPossition = 7;
-			pPawnB.pType(0);
+			pPawnB.yPossition = 6;
+			pPawnB.type = "♟";
 			pPawnB.team = Team.BLACK;
-			pieceList.add(pPawnB);
+			board[pPawnB.yPossition][pPawnB.xPossition] = pPawnB;	
 		}
+	    boardPrinter();
 	}
 	
 	

@@ -5,7 +5,6 @@ public class Piece {
 	int xPossition; 
 	int yPossition;
 	protected static final String[] PIECES = {
-		    "♟",  // Black Pawn
 		    "♜", // Black Rook
 		    "♞", // Black Knight
 		    "♝", // Black Bishop
@@ -16,10 +15,15 @@ public class Piece {
 		    "♜", // Black Rook
 		};
 	String type = "";
-	String Pawn = "♟";
+	
+	public enum direction {
+	    UPP,
+	    NER
+	}
+
 	
 	protected String pType (int type) {
-		if (type >= 0 && type <= 9) {
+		if (type >= 0 && type < 10) {
 			this.type = this.PIECES[type];	
 		}
 		return this.type;

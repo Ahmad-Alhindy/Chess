@@ -2,17 +2,24 @@ package Game;
 import java.awt.event.MouseAdapter;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.swing.border.Border;
+
+import Game.ChessView.ChessBoard;
+
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.List;
 import java.awt.event.MouseEvent;
 import java.awt.Color;
+import java.awt.Graphics;
 
 public class Move extends MouseAdapter {
 
 	private Board board;
 	private int width, height;
 	private ChessView chessView; // Reference to ChessView
+	//private ChessBoard chessBoard;
 	private boolean pieceIsSelected = false;
 	List<int[]> legalMove = new ArrayList<>(); 
 
@@ -27,9 +34,13 @@ public class Move extends MouseAdapter {
 	public void mouseClicked(MouseEvent e) {
 		int clickedRow = e.getY() / height;
 		int clickedCol = e.getX() / width;
-
-		String clickedPiece = this.board.board[clickedRow][clickedCol];
-		System.out.println("this is the click " + clickedPiece);
+		Piece clickedPiece = this.board.board[clickedRow][clickedCol]; 
+		if (clickedPiece != null) {
+		System.out.println("this is the click " + clickedPiece.type);
+		}
+		else {
+			System.out.println("this piece is null");
+		}
 		if (clickedPiece != null && this.pieceIsSelected == false) {
 			/*System.out.println("clicked piece is not null row" + clickedRow + " column " + clickedCol );*/
 			showLegalMoves(clickedRow, clickedCol, clickedPiece); 
@@ -48,45 +59,37 @@ public class Move extends MouseAdapter {
 			chessView.updateSquareColor(0, 0, Color.red); //just putting som random color but it will never color in red
 			this.pieceIsSelected = false;
 			}
+		
 		else if (clickedPiece == null && this.pieceIsSelected == true) {
-				Color c = chessView.squareColors[clickedRow][clickedCol];
-				if (c == Color.CYAN) {
-					System.out.println("this work" + clickedRow + clickedCol);
-				}
-			
+				Color c = chessView.squareColors[clickedCol][clickedRow];
+				//if (c == Color.CYAN) {
+					//Piece p = board.pieceList.get(17);
+					//System.out.println("this work" + clickedCol + clickedRow + c + p.type);
+				//}			
 		}
 	}
-			/*
-				while (legalMove.size() > 0) {
-					int[] square = legalMove.get(0); // Get the first element
-					legalMove.remove(0);
-					int row = square[0];
-					int col = square[1];    
-					Color previousColor = squareColorMap.get(row + "," + col);
-					// Repaint the square back to the previous color
-					chessView.updateSquareColor(col, row, previousColor);
-					//System.out.println("square to repain row" + row + "column" + col);
-					// Remove the last stored color
-					squareColorMap.remove(row + "," + col);
-				}
-				*/
+		
 			
-	private void showLegalMoves(int row , int col , String clickedPiece) {
-		if (clickedPiece == "♟") {
+	private void showLegalMoves(int row , int col , Piece clickedPiece) {
+		if (clickedPiece == null ) {
+			return;
+		}
+		if (clickedPiece.type == "♟") {
 			this.legalMove.add(new int[]{row , col});
 			this.legalMove.add(new int[]{row + 1 , col});
+			
 			if (row == 1) {
 				this.legalMove.add(new int[]{row + 2 , col});
 			}
 		}
-		if (clickedPiece == "♙") {
+		if (clickedPiece.type == "♙") {
 			this.legalMove.add(new int[]{row , col});
 			this.legalMove.add(new int[]{row - 1 , col});
 			if (row == 6) {
 				this.legalMove.add(new int[]{row - 2 , col});
 			}
 		}
-		if ("♜".equals(clickedPiece) || "♖".equals(clickedPiece)) {
+		if ("♜".equals(clickedPiece.type) || "♖".equals(clickedPiece.type)) {
 
 			int[][] directions = {
 					{0, 1},  // Right
@@ -112,7 +115,7 @@ public class Move extends MouseAdapter {
 		}
 
 
-		if ("♝".equals(clickedPiece) || "♗".equals(clickedPiece)) {
+		if ("♝".equals(clickedPiece.type) || "♗".equals(clickedPiece.type)) {
 			int[][] directions = {
 					{1, 1},  
 					{-1, -1}, 
@@ -136,7 +139,7 @@ public class Move extends MouseAdapter {
 		}
 
 
-		if ("♞".equals(clickedPiece) || "♘".equals(clickedPiece)) {
+		if ("♞".equals(clickedPiece.type) || "♘".equals(clickedPiece.type)) {
 			int[][] directions = {
 					{1, 2},  
 					{-1, 2},  
@@ -161,7 +164,7 @@ public class Move extends MouseAdapter {
 				y += dy;
 			}
 		}
-		if ("♛".equals(clickedPiece) || "♕".equals(clickedPiece)) {
+		if ("♛".equals(clickedPiece.type) || "♕".equals(clickedPiece.type)) {
 			int[][] directions = {
 					{0, 1},  
 					{0, -1}, 
@@ -189,7 +192,7 @@ public class Move extends MouseAdapter {
 			}
 		}
 		
-		if ("♔".equals(clickedPiece) || "♚".equals(clickedPiece)) {
+		if ("♔".equals(clickedPiece.type) || "♚".equals(clickedPiece.type)) {
 			int[][] directions = {
 					{0, 1},  
 					{0, -1}, 
@@ -201,11 +204,16 @@ public class Move extends MouseAdapter {
 					{-1, 1}  
 			};
 			this.legalMove.add(new int[] {row , col});
+			System.out.println("row: " + row +" col: " +col + " " + board.board[row][col]);
+
 			for (int[] direction : directions) {
 				int dx = direction[0];
 				int dy = direction[1];
+				System.out.println("dx: " + dx +"dy: " + dy);
 				int x = row + dx;
 				int y = col + dy;
+				System.out.println("x: " + x +"y: " + y);
+
 
 				// Loop until out of bounds or blocked
 				if (x >= 0 && x < this.board.board.length && y >= 0 && y < this.board.board[0].length 
