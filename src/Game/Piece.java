@@ -15,10 +15,11 @@ public class Piece {
 		    "♜", // Black Rook
 		};
 	String type = "";
+	Direction direction;
 	
-	public enum direction {
+	public enum Direction {
 	    UPP,
-	    NER
+	    Down
 	}
 
 	
@@ -29,5 +30,7 @@ public class Piece {
 		return this.type;
 	}
 	
-	public Piece() {}
+	public Piece(Direction direc) {
+		this.direction = direc;
+	}
 }
