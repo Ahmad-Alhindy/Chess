@@ -3,6 +3,7 @@ package Game;
 import java.awt.Canvas;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.Console;
 import java.awt.Font;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -75,14 +76,16 @@ public class ChessView extends JFrame{
 
 
 		@Override
-		protected void paintComponent(Graphics g) { // it used as the paint method 
+		protected void paintComponent(Graphics g) { 	// it used as the paint method
+			System.out.println("We are paiting the starting position"); 
+		
 
 			super.paintComponent(g); // call the paint method form JPanel to ensure every thing is draw
 			chessView.Width = getWidth() / 8; // calculate the width of one square
 			chessView.hight = getHeight() / 8;
 
 			if (chessView.listnerAdedd == false) {
-				Move listener = new Move(board, chessView, chessView.Width, chessView.hight);
+				Move listener = new Move(board, chessView, chessView.Width, chessView.hight, this);
 				addMouseListener(listener);
 				chessView.listnerAdedd = true;
 			}
@@ -124,18 +127,7 @@ public class ChessView extends JFrame{
 
 		}
 
-
-		/*protected void movePiece(int x, int y, int xAfter, int yAfter) { // it used as the paint method 
-
-        	super.paintComponent(g); // call the paint method form JPanel to ensure every thing is draw
-        	chessView.Width = getWidth() / 8; // calculate the width of one square
-        	chessView.hight = getHeight() / 8;
-        	g.setColor(chessView.squareColors[x][y]);
-        	g.fillRect(x, y, chessView.Width, chessView.Width);
-
-
-
-        }*/
+        
 
 
 	}

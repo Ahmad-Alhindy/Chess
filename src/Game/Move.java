@@ -1,5 +1,7 @@
 package Game;
 import java.awt.event.MouseAdapter;
+import java.awt.Graphics;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,15 +22,18 @@ public class Move extends MouseAdapter {
 	private Board board;
 	private int width, height;
 	private ChessView chessView; // Reference to ChessView
-	//private ChessBoard chessBoard;
+	private ChessBoard chessBoard;
 	private boolean pieceIsSelected = false;
+	Direction direction;
+	private Piece selectedPiece = new Piece(direction);
 	List<int[]> legalMove = new ArrayList<>(); 
 
-	public Move(Board board, ChessView chessView ,int width, int height) {
+	public Move(Board board, ChessView chessView ,int width, int height, ChessBoard chessBoard) {
 		this.board = board;
 		this.width = width;
 		this.height = height;
 		this.chessView = chessView;
+		this.chessBoard = chessBoard;
 	}
 
 	@Override
@@ -43,6 +48,10 @@ public class Move extends MouseAdapter {
 			System.out.println("this piece is null");
 		}
 		if (clickedPiece != null && this.pieceIsSelected == false) {
+			selectedPiece = board.board[clickedRow][clickedCol];
+			selectedPiece.type = clickedPiece.type;
+			selectedPiece.direction = clickedPiece.direction;
+			
 			/*System.out.println("clicked piece is not null row" + clickedRow + " column " + clickedCol );*/
 			showLegalMoves(clickedRow, clickedCol, clickedPiece); 
 
@@ -57,44 +66,61 @@ public class Move extends MouseAdapter {
 
 		}
 		else  if (clickedPiece != null && this.pieceIsSelected == true){
-			chessView.updateSquareColor(0, 0, Color.red); //just putting som random color but it will never color in red
+			chessView.updateSquareColor(0, 0, Color.red); //just putting some random color but it will never color in red
 			this.pieceIsSelected = false;
 			}
 		
 		else if (clickedPiece == null && this.pieceIsSelected == true) {
 				Color c = chessView.squareColors[clickedCol][clickedRow];
-				//if (c == Color.CYAN) {
-					//Piece p = board.pieceList.get(17);
-					//System.out.println("this work" + clickedCol + clickedRow + c + p.type);
-				//}			
+				movingPiece(clickedRow, clickedCol);	
+				System.out.println(c);
+				chessView.updateSquareColor(0, 0, Color.red);
+				this.pieceIsSelected = false;		
 		}
 	}
+	
+	
+	private void movingPiece(int row, int col) {
+		Color color = chessView.squareColors[col][row];
+		if (color == Color.CYAN) {
+			board.board[row][col] = selectedPiece;
+			board.board[selectedPiece.yPossition][selectedPiece.xPossition] = null;
+			//clickedPiece = null;
+			selectedPiece.yPossition = row;
+			selectedPiece.xPossition = col;
+			board.boardPrinter();
+			Graphics g = chessBoard.getGraphics();
+			chessBoard.paintComponent(g);
+		}	
+		System.out.println("this work" + col + row + color + selectedPiece.type);
+	}
+	
 		
 	
 	
 	
 	private void rock( int row, int col ) {
-			int[][] directions = {
-					{0, 1},  // Right
-					{0, -1}, // Left
-					{1, 0},  // Down
-					{-1, 0}  // Up
-			};
-			this.legalMove.add(new int[] {row , col});
-			for (int[] direction : directions) {
-				int dx = direction[0];
-				int dy = direction[1];
-				int x = row + dx;
-				int y = col + dy;
+		int[][] directions = {
+				{0, 1},  // Right
+				{0, -1}, // Left
+				{1, 0},  // Down
+				{-1, 0}  // Up
+		};
+		this.legalMove.add(new int[] {row , col});
+		for (int[] direction : directions) {
+			int dx = direction[0];
+			int dy = direction[1];
+			int x = row + dx;
+			int y = col + dy;
 
-				// Loop until out of bounds or blocked
-				while (x >= 0 && x < this.board.board.length && y >= 0 && y < this.board.board[0].length 
-						&& this.board.board[x][y] == null) {
-					this.legalMove.add(new int[] {x, y});
-					x += dx; // Move further in the same direction
-					y += dy;
-				}
+			// Loop until out of bounds or blocked
+			while (x >= 0 && x < this.board.board.length && y >= 0 && y < this.board.board[0].length 
+					&& this.board.board[x][y] == null) {
+				this.legalMove.add(new int[] {x, y});
+				x += dx; // Move further in the same direction
+				y += dy;
 			}
+		}
 	}
 	private void bishop(int row, int col ) {
 		int[][] directions = {
@@ -230,17 +256,17 @@ public class Move extends MouseAdapter {
 		if (clickedPiece.type == "♜") {
 			rock(row, col);
 		}
-		if ("♝".equals(clickedPiece.type) || "♗".equals(clickedPiece.type)) {
+		if ("♝".equals(clickedPiece.type)) {
 			bishop(row, col);
 		}
-		if ("♞".equals(clickedPiece.type) || "♘".equals(clickedPiece.type)) {
+		if ("♞".equals(clickedPiece.type)) {
 			knight(row, col);
 		}
-		if ("♛".equals(clickedPiece.type) || "♕".equals(clickedPiece.type)) {
+		if ("♛".equals(clickedPiece.type)) {
 			king(row, col);
 		}
 		
-		if ("♔".equals(clickedPiece.type) || "♚".equals(clickedPiece.type)) {
+		if ("♚".equals(clickedPiece.type)) {
 			queen(row, col);
 			}
 			//System.out.println("Legal moves for " + clickedPiece + ":");
