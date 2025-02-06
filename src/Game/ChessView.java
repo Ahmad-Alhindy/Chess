@@ -13,7 +13,9 @@ import javax.swing.*;
 
 
 public class ChessView extends JFrame{    
-
+	int called = 0;
+	int subcalled = 0;
+	boolean isUpdaiting = false;
 	int Width = 0;
 	int hight = 0;
 	boolean listnerAdedd = false;
@@ -36,22 +38,17 @@ public class ChessView extends JFrame{
 	}
 
 	public void updateSquareColor(int row, int col, Color color) {
-		//System.out.println("updateSquareColor Square at (" + row + ", " + col + ") updated to " + color);	
 		if (color == Color.CYAN) {
+			subcalled += 1;
 			int x = col * this.Width; 
-		    int y = row * this.hight; 
+			int y = row * this.hight; 
 			squareColors[row][col] = color; // Update the color
 			repaint();
-			 System.out.println("color is " + color);
+			//System.out.println("color is " + color + " " + subcalled);
+			isUpdaiting = true;
 		}
 		else {
-			for (int i = 0; i < 8; i++) {
-				for (int j = 0; j < 8; j++) {
-					squareColors[i][j] = (i + j) % 2 == 0 ? Color.WHITE : Color.BLACK;
-				}
-			}
-			repaint();  
-			System.out.println("repaint is done");
+			return;	
 		}
 
 	}
@@ -77,8 +74,9 @@ public class ChessView extends JFrame{
 
 		@Override
 		protected void paintComponent(Graphics g) { 	// it used as the paint method
-			System.out.println("We are paiting the starting position"); 
-		
+			chessView.called += 1;
+			System.out.println("We are paiting the starting position " + chessView.called); 
+
 
 			super.paintComponent(g); // call the paint method form JPanel to ensure every thing is draw
 			chessView.Width = getWidth() / 8; // calculate the width of one square
@@ -89,7 +87,13 @@ public class ChessView extends JFrame{
 				addMouseListener(listener);
 				chessView.listnerAdedd = true;
 			}
-
+			if (!chessView.isUpdaiting) {
+				for (int i = 0; i < 8; i++) {
+					for (int j = 0; j < 8; j++) {
+						chessView.squareColors[i][j] = (i + j) % 2 == 0 ? Color.WHITE : Color.BLACK;
+					}
+				}
+			}
 
 			for (int i = 0; i < 8; i++) {
 				for (int j = 0; j < 8; j++) {
@@ -100,34 +104,37 @@ public class ChessView extends JFrame{
 
 			if (addpiece == false) {  
 				board.addPices();
-				addpiece = true;
+
 			}
 
 
 			// this for loop to draw the pieces
-			for (int row = 0; row < board.board.length; ++row) {
-				if (board.board[row] == null) continue;
-				for (int col = 0; col < board.board[row].length; ++col) {
-					if (board.board[row][col]!= null) {
-						Piece p = board.board[row][col]; 
-						int xPos = p.xPossition * chessView.Width + 5;
-						int yPos = p.yPossition * chessView.hight + 40 ;
-						String pieceSymbol = p.type;
-						g.setFont(new Font("TimesRoman", Font.PLAIN, (int) Math.floor(chessView.Width * 0.8)));
-						g.setColor(p.team == Team.WHITE ? Color.blue : Color.RED); // Different color for teams      
-						g.drawString(pieceSymbol, xPos, yPos);  // Adjust for centering
-						//System.out.println("Piece: " + p.type + " at (x " + xPos + ", y " + yPos + ")");
-						//System.out.println("Piece: " + p.type + "xPossition " + p.xPossition + "p.yPossition " + p.yPossition);
+				for (int row = 0; row < board.board.length; ++row) {
+					if (board.board[row] == null) continue;
+					for (int col = 0; col < board.board[row].length; ++col) {
+						if (board.board[row][col]!= null) {
+							Piece p = board.board[row][col]; 
+							int xPos = p.xPossition * chessView.Width + 5;
+							int yPos = p.yPossition * chessView.hight + 40 ;
+							String pieceSymbol = p.type;
+							g.setFont(new Font("TimesRoman", Font.PLAIN, (int) Math.floor(chessView.Width * 0.8)));
+							g.setColor(p.team == Team.WHITE ? Color.blue : Color.RED); // Different color for teams      
+							g.drawString(pieceSymbol, xPos, yPos);  // Adjust for centering
+							//System.out.println("Piece: " + p.type + " at (x " + xPos + ", y " + yPos + ")");
+							//System.out.println("Piece: " + p.type + "xPossition " + p.xPossition + "p.yPossition " + p.yPossition);
+						}
+						else {
+							continue;
+						}
 					}
-					else {
-						continue;
-					}
+					addpiece = true;
 				}
-			}
+		
+
 
 		}
 
-        
+
 
 
 	}
