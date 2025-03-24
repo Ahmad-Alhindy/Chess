@@ -1,6 +1,5 @@
 package Game;
 
-import java.util.ArrayList;
 
 import Game.Piece.Direction;
 
@@ -38,12 +37,12 @@ public class Board {
 			pWhite.team = Team.WHITE;
 			board[pWhite.yPossition][pWhite.xPossition] = pWhite;	
 			
-			Piece pPawnW = new Piece(downDirection);
+		/*	Piece pPawnW = new Piece(downDirection);
 			pPawnW.xPossition = i;
 			pPawnW.yPossition = 1;
 			pPawnW.type = "♟";
 			pPawnW.team = Team.WHITE;
-			board[pPawnW.yPossition][pPawnW.xPossition] = pPawnW;	
+			board[pPawnW.yPossition][pPawnW.xPossition] = pPawnW;	*/
 
 			
 			Piece pBlack = new Piece(uppDirection);
@@ -54,12 +53,12 @@ public class Board {
 			board[pBlack.yPossition][pBlack.xPossition] = pBlack;	
 			
 			
-			Piece pPawnB = new Piece(uppDirection);
+		/*	Piece pPawnB = new Piece(uppDirection);
 			pPawnB.xPossition = i;
 			pPawnB.yPossition = 6;
 			pPawnB.type = "♟";
 			pPawnB.team = Team.BLACK;
-			board[pPawnB.yPossition][pPawnB.xPossition] = pPawnB;
+			board[pPawnB.yPossition][pPawnB.xPossition] = pPawnB;*/
 		}
 	    boardPrinter();
 	}
