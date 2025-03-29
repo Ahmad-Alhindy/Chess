@@ -1,12 +1,7 @@
 package Game;
 import java.awt.event.MouseAdapter;
 import java.awt.Graphics;
-
-
-
-
 import Game.ChessView.ChessBoard;
-import Game.Piece.Direction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,13 +16,20 @@ public class Move extends MouseAdapter {
 	private ChessView chessView; // Reference to ChessView
 	private ChessBoard chessBoard;
 	private boolean pieceIsSelected = false;
-	Direction direction;
 	Team team = Team.WHITE;
+	private boolean underAttack  = false;
+	private boolean checkingTheKing = false;
 	int teamTurn = 1;
-	protected Piece selectedPiece = new Piece(direction);
+	protected Piece selectedPiece = new Piece();
 	List<int[]> legalMove = new ArrayList<>(); 
-	List<int[]> legalMoveForAllPieces = new ArrayList<>(); 
-	
+
+	List<int[]> pawnMoves = new ArrayList<>();
+	List<int[]> rookMoves = new ArrayList<>();
+	List<int[]> bishopMoves = new ArrayList<>();
+	List<int[]> knightMoves = new ArrayList<>();
+	List<int[]> queenMoves = new ArrayList<>();
+	List<int[]> kingMoves = new ArrayList<>();
+
 	public Move(Board board, ChessView chessView ,int width, int height, ChessBoard chessBoard) {
 		this.board = board;
 		this.width = width;
@@ -41,46 +43,56 @@ public class Move extends MouseAdapter {
 		team = (teamTurn % 2 == 0) ? Team.WHITE : Team.BLACK;
 		int clickedRow = e.getY() / height;
 		int clickedCol = e.getX() / width;
+		
 		Piece clickedPiece = this.board.board[clickedRow][clickedCol]; 
 		if (clickedPiece != null) {
 			System.out.println("this is the click " + clickedPiece.type);
+			selectedPiece = clickedPiece;
 		}
 		else {
 			System.out.println("this piece is null");
 		}
+		boolean kingInCheck = checkkingStatuse();
+
 		if (clickedPiece != null && this.pieceIsSelected == false && clickedPiece.team == team) {
-			selectedPiece = board.board[clickedRow][clickedCol];
-			selectedPiece.type = clickedPiece.type;
-			selectedPiece.direction = clickedPiece.direction;
+			selectedPiece = clickedPiece;
+			
 
 			/*System.out.println("clicked piece is not null row" + clickedRow + " column " + clickedCol );*/
 			showLegalMoves(clickedRow, clickedCol, clickedPiece, this.legalMove); 
+			
+			legalMove.removeIf(move -> !moveSavesKing(move[0], move[1]));
+			
 
-			while (legalMove.size() > 0) {
-				int[] square = legalMove.get(0);
-				legalMove.remove(0);
-				int row = square[0];
-				int col = square[1];
-				chessView.updateSquareColor(col , row, Color.cyan); // we send it like that because that repaint take the first as x  and the x is the column														
+			for (int[] square : legalMove) {
+				chessView.updateSquareColor(square[1], square[0], Color.cyan);
 			}
+
+			legalMove.clear();
 			this.pieceIsSelected = true ;
-			this.legalMoveForAllPieces.clear();
+			//this.legalMoveForAllPieces.clear();
 		}
-		else  if (clickedPiece != null && this.pieceIsSelected == true && clickedPiece.direction == selectedPiece.direction){
+		else  if (clickedPiece != null && this.pieceIsSelected == true && clickedPiece.team == selectedPiece.team){
 			chessView.isUpdaiting = false;
 			Graphics g = chessBoard.getGraphics();
 			chessBoard.paintComponent(g);
 			this.pieceIsSelected = false;
 		}
 
-		else if (clickedPiece == null && this.pieceIsSelected == true) {
-			chessView.isUpdaiting = false;
-			movingPiece(clickedRow, clickedCol);	
-			this.pieceIsSelected = false;		
+		else if (clickedPiece == null && this.pieceIsSelected) {
+
+			if (!kingInCheck || moveSavesKing(clickedRow, clickedCol)) {
+				chessView.isUpdaiting = false;
+				movingPiece(clickedRow, clickedCol);
+			}
+			pieceIsSelected = false;
 		}
-		else if(clickedPiece != null && this.pieceIsSelected == true && clickedPiece.direction != selectedPiece.direction && clickedPiece.team != team) {
-			chessView.isUpdaiting = false;
-			movingPiece(clickedRow, clickedCol);
+		else if(clickedPiece != null && this.pieceIsSelected && clickedPiece.team != selectedPiece.team && clickedPiece.team != team) {
+
+			if (!kingInCheck || moveSavesKing(clickedRow, clickedCol)) {
+				chessView.isUpdaiting = false;
+				movingPiece(clickedRow, clickedCol);
+			}
 			this.pieceIsSelected = false;
 		}
 	}
@@ -93,24 +105,137 @@ public class Move extends MouseAdapter {
 			board.board[selectedPiece.yPossition][selectedPiece.xPossition] = null;
 			selectedPiece.yPossition = row;
 			selectedPiece.xPossition = col;
-			board.boardPrinter();
+			//board.boardPrinter();
 			Graphics g = chessBoard.getGraphics();
 			chessBoard.paintComponent(g);
+			this.pieceIsSelected = false;		
+		}
+		else {
+			return;
 		}
 		teamTurn += 1 ;
 	}
 
 	private void checkTheKing() {
+		pawnMoves.clear();
+		pawnMoves.clear();
+		rookMoves.clear();
+		bishopMoves.clear();
+		knightMoves.clear();
+		queenMoves.clear();
+		kingMoves.clear();
 		for (int x = 0; x < this.board.board.length; x++) {
 			for (int y = 0; y < this.board.board[x].length; y++) {
-				if (board.board[x][y] != null && board.board[x][y].direction != selectedPiece.direction) {
-					showLegalMoves(x, y, board.board[x][y], legalMoveForAllPieces);
-					//System.out.println("We are adding now legal move for " + board.board[x][y].type);
+				Piece piece = board.board[x][y];
+				//board.boardPrinter();
+				if (piece != null && piece.team != selectedPiece.team) {
+					Piece temp = selectedPiece; // Save current selectedPiece
+					selectedPiece = piece; // Temporarily set selectedPiece
+					switch (piece.type) {
+					case "♟":
+						showLegalMoves(x, y, piece, pawnMoves);
+						break;
+					case "♜":
+						showLegalMoves(x, y, piece, rookMoves);
+						break;
+					case "♝":
+						showLegalMoves(x, y, piece, bishopMoves);
+						break;
+					case "♞":
+						showLegalMoves(x, y, piece, knightMoves);
+						break;
+					case "♛":
+						showLegalMoves(x, y, piece, queenMoves);
+						break;
+					case "♚":
+						this.checkingTheKing = true;
+						showLegalMoves(x, y, piece, kingMoves);
+						break;
+					}
+					selectedPiece = temp; // Restore selectedPiece
 				}
 			}
 		}
 		System.out.println("now we done");
 
+	}
+
+
+
+
+	private void king1(int row, int col, List<int[]> legalMove) {
+
+		int[][] directions = {
+				{0, 1}, {0, -1}, // Right, Left
+				{-1, 0}, {1, 0}, // Up, Down
+				{1, 1}, {-1, -1}, // Diagonal Down-Right, Up-Left
+				{1, -1}, {-1, 1}  // Diagonal Down-Left, Up-Right
+		};
+
+		for (int[] dir : directions) {
+			int x = row + dir[0];
+			int y = col + dir[1];
+
+			if (x >= 0 && x < board.board.length && y >= 0 && y < board.board[0].length) {
+				Piece piece = board.board[x][y];
+				//List<List<int[]>> allMoves = Arrays.asList(pawnMoves, rookMoves, bishopMoves, knightMoves, queenMoves, kingMoves);
+				//underAttack = isUnderAttack(x, y, allMoves);
+				// Now validate the move
+
+				if (piece == null || piece.team != selectedPiece.team) { 
+					// Allow move if it's an empty square or capturing an opponent piece
+					legalMove.add(new int[]{x, y});	
+				}
+			}
+		}
+	}
+
+
+	private void king(int row, int col, List<int[]> legalMove) {
+		if (board.board[row][col].type.equals("♚") && board.board[row][col].team == selectedPiece.team) {
+			checkTheKing();
+		}
+
+
+		int[][] directions = {
+				{0, 1}, {0, -1}, // Right, Left
+				{-1, 0}, {1, 0}, // Up, Down
+				{1, 1}, {-1, -1}, // Diagonal Down-Right, Up-Left
+				{1, -1}, {-1, 1}  // Diagonal Down-Left, Up-Right
+		};
+
+		for (int[] dir : directions) {
+			int x = row + dir[0];
+			int y = col + dir[1];
+
+			if (x >= 0 && x < board.board.length && y >= 0 && y < board.board[0].length) {
+				Piece originalPiece = board.board[x][y]; // Save original piece (could be null)
+				int oldX = selectedPiece.xPossition;
+				int oldY = selectedPiece.yPossition;
+
+				// Simulate move
+				board.board[x][y] = selectedPiece;
+				board.board[oldY][oldX] = null;
+				selectedPiece.xPossition = x;
+				selectedPiece.yPossition = y;
+
+				checkTheKing();
+				List<List<int[]>> allMoves = Arrays.asList(pawnMoves, rookMoves, bishopMoves, knightMoves, queenMoves, kingMoves);
+				underAttack = isUnderAttack(x, y, allMoves);
+				// Restore board state
+				board.board[oldY][oldX] = selectedPiece;
+				board.board[x][y] = originalPiece;
+				selectedPiece.xPossition = oldX;
+				selectedPiece.yPossition = oldY;
+
+				if (!underAttack) { 
+					// Add move only if it's safe
+					if (originalPiece == null || originalPiece.team != selectedPiece.team) {
+						legalMove.add(new int[]{x, y});
+					}
+				}
+			}
+		}
 	}
 
 
@@ -133,13 +258,13 @@ public class Move extends MouseAdapter {
 			int y = col + dy;
 			if (x >= 0 && x < this.board.board.length && y >= 0 && y < this.board.board[0].length) {
 				Piece piece = board.board[x][y];
-				if (piece != null && selectedPiece.direction != piece.direction) {
+				if (piece != null && selectedPiece.team != piece.team) {
 					legalMove.add(new int[] {x, y});
 				}
 				if (piece == null) {
 					legalMove.add(new int[] {x, y});
 				}
-				if (piece != null && piece.direction == selectedPiece.direction) {
+				if (piece != null && piece.team == selectedPiece.team) {
 					continue;
 				}
 			}
@@ -162,14 +287,14 @@ public class Move extends MouseAdapter {
 			// Loop until out of bounds or blocked
 			while (x >= 0 && x < this.board.board.length && y >= 0 && y < this.board.board[0].length) {
 				Piece piece = board.board[x][y];
-				if (piece != null && selectedPiece.direction != piece.direction) {
+				if (piece != null && selectedPiece.team != piece.team) {
 					legalMove.add(new int[] {x, y});
 					break;
 				}
 				if (piece == null) {
 					legalMove.add(new int[] {x, y});
 				}
-				if (piece != null && piece.direction == selectedPiece.direction) {
+				if (piece != null && piece.team == selectedPiece.team) {
 					break;
 				}
 				x += dx; // Move further in the same direction
@@ -193,14 +318,14 @@ public class Move extends MouseAdapter {
 			// Loop until out of bounds or blocked
 			while (x >= 0 && x < this.board.board.length && y >= 0 && y < this.board.board[0].length) {
 				Piece piece = board.board[x][y];
-				if (piece != null && selectedPiece.direction != piece.direction) {
+				if (piece != null && selectedPiece.team != piece.team) {
 					legalMove.add(new int[] {x, y});
 					break;
 				}
 				if (piece == null) {
 					legalMove.add(new int[] {x, y});
 				}
-				if (piece != null && piece.direction == selectedPiece.direction) {
+				if (piece != null && piece.team == selectedPiece.team) {
 					break;
 				}
 				x += dx; // Move further in the same direction
@@ -209,94 +334,66 @@ public class Move extends MouseAdapter {
 			}
 		}
 	}
-	private void king(int row, int col, List<int[]> legalMove) {
-	    if (board.board[row][col].type.equals("♚") && board.board[row][col].direction == selectedPiece.direction) {
-	        checkTheKing();
-	    }
 
-	    legalMove.add(new int[] { row, col });
+	private boolean moveSavesKing(int row, int col) {
+		Piece originalPiece = board.board[row][col];
+		int oldX = selectedPiece.xPossition;
+		int oldY = selectedPiece.yPossition;
 
-	    int[][] horizontal = { {0, 1}, {0, -1} };    // Right and Left  
-	    int[][] vertical   = { {-1, 0}, {1, 0} };      // Up and Down  
-	    int[][] diagonal1  = { {1, 1}, {-1, -1} };      // Down-Right & Up-Left  
-	    int[][] diagonal2  = { {1, -1}, {-1, 1} };      // Down-Left & Up-Right  
-	    int[][][] directions = { horizontal, vertical, diagonal1, diagonal2 };
+		board.board[row][col] = selectedPiece;
+		board.board[oldY][oldX] = null;
+		selectedPiece.xPossition = row;
+		selectedPiece.yPossition = col;
 
-	    for (int[][] group : directions) {
-	        boolean groupBlocked = false;
-	        boolean grouBisok = false;
+		boolean stillInCheck = checkkingStatuse();
 
-	        // First pass: Check if any move in the group is blocked.
-	        // Block the group only if the empty square is under attack.
-	        for (int[] dir : group) {
-	            int dx = dir[0];
-	            int dy = dir[1];
-	            int x = row + dx;
-	            int y = col + dy;
-	            if (x >= 0 && x < board.board.length && y >= 0 && y < board.board[0].length) {
-	                Piece piece = board.board[x][y];
-	                boolean underAttack = legalMoveForAllPieces.stream().anyMatch(arr -> Arrays.equals(arr, new int[]{x, y}));
-	                // Only block the group if the square is empty and under attack.
-	                if (piece == null && underAttack) {
-	                    groupBlocked = true;
-	                    break;
-	                }
-	                else if (piece != null && underAttack) {
-	                	grouBisok = true;
-	                	groupBlocked = true;
-	                	break;
-	                }
-	            }
-	        }
+		board.board[oldY][oldX] = selectedPiece;
+		board.board[row][col] = originalPiece;
+		selectedPiece.xPossition = oldX;
+		selectedPiece.yPossition = oldY;
 
-	        // If the group is blocked, skip processing all directions in the group.
-	        if (groupBlocked && !grouBisok) {
-	            continue;
-	        }
-	        if (grouBisok) {
-	            for (int[] dir : group) {
-		            int dx = dir[0];
-		            int dy = dir[1];
-		            int x = row + dx;
-		            int y = col + dy;
-		            if (x >= 0 && x < board.board.length && y >= 0 && y < board.board[0].length) {
-		                Piece piece = board.board[x][y];
-		                // If there's an enemy piece, add the move regardless of attack status.
-		                if (piece != null && piece.direction != selectedPiece.direction) {
-		                    legalMove.add(new int[] { x, y });
-		                }		          
-		            }
-		        }
-	        }
-	        if (groupBlocked) {
-	            continue;
-	        }
-	        // Second pass: Evaluate each direction in the group.
-	        for (int[] dir : group) {
-	            int dx = dir[0];
-	            int dy = dir[1];
-	            int x = row + dx;
-	            int y = col + dy;
-	            if (x >= 0 && x < board.board.length && y >= 0 && y < board.board[0].length) {
-	                Piece piece = board.board[x][y];
-	                // If there's an enemy piece, add the move regardless of attack status.
-	                if (piece != null && piece.direction != selectedPiece.direction) {
-	                    legalMove.add(new int[] { x, y });
-	                }
-	                // If the square is empty, add it only if it's not under attack.
-	                else if (piece == null) {
-	                    boolean underAttack = legalMoveForAllPieces
-	                            .stream()
-	                            .anyMatch(arr -> Arrays.equals(arr, new int[]{x, y}));
-	                    if (!underAttack) {
-	                        legalMove.add(new int[] { x, y });
-	                    }
-	                }
-	                // Friendly piece: do nothing.
-	            }
-	        }
-	    }
+		return !stillInCheck;
 	}
+
+
+	private int[] getKingPosition(Team team) {
+		for (int x = 0; x < board.board.length; x++) {
+			for (int y = 0; y < board.board[x].length; y++) {
+				Piece piece = board.board[x][y];
+				if (piece != null && piece.type.equals("♚") && piece.team == team) {
+					return new int[]{x, y};
+				}
+			}
+		}
+		return null; // Should never happen unless king is missing
+	}
+	public boolean checkkingStatuse() {
+		int[] kingPos = getKingPosition(team); 
+		if (kingPos == null) return false; // Safety check
+
+		int kingX = kingPos[0];
+		int kingY = kingPos[1];
+		checkTheKing();
+		List<List<int[]>> allMoves = Arrays.asList(pawnMoves, rookMoves, bishopMoves, knightMoves, queenMoves, kingMoves);
+
+		return isUnderAttack(kingX, kingY, allMoves);
+	}
+
+	private boolean isUnderAttack(int x, int y, List<List<int[]>> attackLists) {
+		for (List<int[]> attackList : attackLists) {
+			for (int[] move : attackList) {
+				if (move[0] == x && move[1] == y) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+
+
+
+
 	private void queen(int row, int col, List<int[]> legalMove) {
 		int[][] directions = {
 				{0, 1},  
@@ -308,7 +405,6 @@ public class Move extends MouseAdapter {
 				{1, -1},  
 				{-1, 1}  
 		};
-		legalMove.add(new int[] {row , col});
 		for (int[] direction : directions) {
 			int dx = direction[0];
 			int dy = direction[1];
@@ -317,15 +413,19 @@ public class Move extends MouseAdapter {
 
 			// Loop until out of bounds or blocked
 			while (x >= 0 && x < this.board.board.length && y >= 0 && y < this.board.board[0].length) {
+				//board.boardPrinter();
 				Piece piece = board.board[x][y];
-				if (piece != null && selectedPiece.direction != piece.direction) {
+				if (piece != null && selectedPiece.team != piece.team) {
 					legalMove.add(new int[] {x, y});
+					//System.out.println("we adding " + x + " and "+ y);
 					break;
 				}
 				if (piece == null) {
 					legalMove.add(new int[] {x, y});
+					//System.out.println("we adding " + x + " and "+ y);
+
 				}
-				if (piece != null && piece.direction == selectedPiece.direction) {
+				if (piece != null && piece.team == selectedPiece.team) {
 					break;
 				}
 				x += dx; // Move further in the same direction
@@ -373,6 +473,7 @@ public class Move extends MouseAdapter {
 
 		if (clickedPiece.type == "♜") {
 			rock(row, col, legalMove);
+
 		}
 		if ("♝".equals(clickedPiece.type)) {
 			bishop(row, col, legalMove);
@@ -385,7 +486,13 @@ public class Move extends MouseAdapter {
 		}
 
 		if ("♚".equals(clickedPiece.type)) {
-			king(row, col, legalMove);
+			if (!checkingTheKing) {
+				king(row, col, legalMove);
+			}
+			else {
+				king1(row, col, legalMove);
+				checkingTheKing = false;
+			}
 		}
 		//System.out.println("Legal moves for " + clickedPiece + ":");
 		//for (int[] move : this.legalMove) {
