@@ -1,7 +1,6 @@
 package Game;
 
 
-import Game.Piece.Direction;
 
 public class Board {
 	protected Piece[][] board = new Piece[8][8];  // 8x8 board to hold Piece objects
@@ -27,25 +26,23 @@ public class Board {
 	
 	
 	public void addPices() {
-		Direction downDirection = Direction.Down; 
-		Direction uppDirection = Direction.UPP;
+		
 		for (int i=0; i<8; ++i) {
-			Piece pWhite = new Piece(downDirection);
+			Piece pWhite = new Piece();
 			pWhite.xPossition = i;
 			pWhite.yPossition = 0;
 			pWhite.pType(i);
 			pWhite.team = Team.WHITE;
 			board[pWhite.yPossition][pWhite.xPossition] = pWhite;	
 			
-		/*	Piece pPawnW = new Piece(downDirection);
+			/*Piece pPawnW = new Piece();
 			pPawnW.xPossition = i;
 			pPawnW.yPossition = 1;
-			pPawnW.type = "♟";
 			pPawnW.team = Team.WHITE;
-			board[pPawnW.yPossition][pPawnW.xPossition] = pPawnW;	*/
+			board[pPawnW.yPossition][pPawnW.xPossition] = p.pawn;	*/
 
 			
-			Piece pBlack = new Piece(uppDirection);
+			Piece pBlack = new Piece();
 			pBlack.xPossition = i;
 			pBlack.yPossition = 7;
 			pBlack.pType(i);

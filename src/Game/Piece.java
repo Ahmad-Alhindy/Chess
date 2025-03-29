@@ -15,12 +15,7 @@ public class Piece {
 		    "♜", // Black Rook
 		};
 	String type = "";
-	Direction direction;
 	
-	public enum Direction {
-	    UPP,
-	    Down
-	}
 
 	
 	protected String pType (int type) {
@@ -30,7 +25,7 @@ public class Piece {
 		return this.type;
 	}
 	
-	public Piece(Direction direc) {
-		this.direction = direc;
+	public Piece() {
+		
 	}
 }
