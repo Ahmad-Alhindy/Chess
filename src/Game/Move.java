@@ -43,21 +43,32 @@ public class Move extends MouseAdapter {
 		team = (teamTurn % 2 == 0) ? Team.WHITE : Team.BLACK;
 		int clickedRow = e.getY() / height;
 		int clickedCol = e.getX() / width;
-		
 		Piece clickedPiece = this.board.board[clickedRow][clickedCol]; 
+		Team t1 = Team.BLACK;
 		if (clickedPiece != null) {
-			System.out.println("this is the click " + clickedPiece.type);
-			selectedPiece = clickedPiece;
+			System.out.println("this is the click " + clickedPiece.type);		
+			Team t = board.board[clickedRow][clickedCol].team;
+			t = (t == Team.WHITE) ? Team.BLACK : Team.WHITE;
+			t1 = t;
 		}
 		else {
 			System.out.println("this piece is null");
 		}
 		boolean kingInCheck = checkkingStatuse();
+		int[] kingPos = getKingPosition(team);
+		Piece p = new Piece();
+		p.type = "♚";
+		List<int[]> filteredMoves = new ArrayList<>(kingMoves);
+		filteredMoves.removeIf(move -> !moveSavesKing(move[0], move[1]));
+		kingMoves.clear();
+		kingMoves.addAll(filteredMoves);
+		boolean kingCanMove = !kingMoves.isEmpty();
 
+		if (!kingCanMove) {
+			chessView.showWinner(t1.toString());
+		}
 		if (clickedPiece != null && this.pieceIsSelected == false && clickedPiece.team == team) {
 			selectedPiece = clickedPiece;
-			
-
 			/*System.out.println("clicked piece is not null row" + clickedRow + " column " + clickedCol );*/
 			showLegalMoves(clickedRow, clickedCol, clickedPiece, this.legalMove); 
 			
@@ -156,7 +167,7 @@ public class Move extends MouseAdapter {
 				}
 			}
 		}
-		System.out.println("now we done");
+		//System.out.println("now we done");
 
 	}
 
@@ -227,14 +238,21 @@ public class Move extends MouseAdapter {
 				board.board[x][y] = originalPiece;
 				selectedPiece.xPossition = oldX;
 				selectedPiece.yPossition = oldY;
-
+				
 				if (!underAttack) { 
 					// Add move only if it's safe
 					if (originalPiece == null || originalPiece.team != selectedPiece.team) {
 						legalMove.add(new int[]{x, y});
+						
 					}
 				}
+				
 			}
+		}
+		Team t = board.board[row][col].team;
+		t = (t == Team.WHITE) ? Team.BLACK : Team.WHITE;
+		if (legalMove.isEmpty()) {
+			chessView.showWinner(t.toString());
 		}
 	}
 
@@ -335,6 +353,9 @@ public class Move extends MouseAdapter {
 		}
 	}
 
+	
+	
+	// check if the move save the king if not will be deleted from the place this function is called 
 	private boolean moveSavesKing(int row, int col) {
 		Piece originalPiece = board.board[row][col];
 		int oldX = selectedPiece.xPossition;
@@ -355,7 +376,7 @@ public class Move extends MouseAdapter {
 		return !stillInCheck;
 	}
 
-
+	// get the king position 
 	private int[] getKingPosition(Team team) {
 		for (int x = 0; x < board.board.length; x++) {
 			for (int y = 0; y < board.board[x].length; y++) {
@@ -367,6 +388,9 @@ public class Move extends MouseAdapter {
 		}
 		return null; // Should never happen unless king is missing
 	}
+	
+	
+	//this function will be called when any other piece than the king is clicked 
 	public boolean checkkingStatuse() {
 		int[] kingPos = getKingPosition(team); 
 		if (kingPos == null) return false; // Safety check
@@ -379,6 +403,10 @@ public class Move extends MouseAdapter {
 		return isUnderAttack(kingX, kingY, allMoves);
 	}
 
+	
+	
+	
+	//this check if the king is under attacked
 	private boolean isUnderAttack(int x, int y, List<List<int[]>> attackLists) {
 		for (List<int[]> attackList : attackLists) {
 			for (int[] move : attackList) {

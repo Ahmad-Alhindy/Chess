@@ -20,6 +20,7 @@ public class ChessView extends JFrame{
 	int hight = 0;
 	boolean listnerAdedd = false;
 	protected Color[][] squareColors = new Color[8][8];
+	boolean gameOver = false;
 
 	public ChessView() {
 
@@ -55,7 +56,11 @@ public class ChessView extends JFrame{
 
 
 
-
+	public void showWinner(String winner) {
+	    JOptionPane.showMessageDialog(this, winner + " wins!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+	    dispose(); // Close the game
+	    new StartTheGame(); // Restart to start screen
+	}
 
 
 
@@ -109,33 +114,29 @@ public class ChessView extends JFrame{
 
 
 			// this for loop to draw the pieces
-				for (int row = 0; row < board.board.length; ++row) {
-					if (board.board[row] == null) continue;
-					for (int col = 0; col < board.board[row].length; ++col) {
-						if (board.board[row][col]!= null) {
-							Piece p = board.board[row][col]; 
-							int xPos = p.xPossition * chessView.Width + 5;
-							int yPos = p.yPossition * chessView.hight + 40 ;
-							String pieceSymbol = p.type;
-							g.setFont(new Font("TimesRoman", Font.PLAIN, (int) Math.floor(chessView.Width * 0.8)));
-							g.setColor(p.team == Team.WHITE ? Color.blue : Color.RED); // Different color for teams      
-							g.drawString(pieceSymbol, xPos, yPos);  // Adjust for centering
-							//System.out.println("Piece: " + p.type + " at (x " + xPos + ", y " + yPos + ")");
-							//System.out.println("Piece: " + p.type + "xPossition " + p.xPossition + "p.yPossition " + p.yPossition);
-						}
-						else {
-							continue;
-						}
+			for (int row = 0; row < board.board.length; ++row) {
+				if (board.board[row] == null) continue;
+				for (int col = 0; col < board.board[row].length; ++col) {
+					if (board.board[row][col]!= null) {
+						Piece p = board.board[row][col]; 
+						int xPos = p.xPossition * chessView.Width + 5;
+						int yPos = p.yPossition * chessView.hight + 40 ;
+						String pieceSymbol = p.type;
+						g.setFont(new Font("TimesRoman", Font.PLAIN, (int) Math.floor(chessView.Width * 0.8)));
+						g.setColor(p.team == Team.WHITE ? Color.blue : Color.RED); // Different color for teams      
+						g.drawString(pieceSymbol, xPos, yPos);  // Adjust for centering
+						//System.out.println("Piece: " + p.type + " at (x " + xPos + ", y " + yPos + ")");
+						//System.out.println("Piece: " + p.type + "xPossition " + p.xPossition + "p.yPossition " + p.yPossition);
 					}
-					addpiece = true;
+					else {
+						continue;
+					}
 				}
-		
-
-
+				addpiece = true;
+			}
 		}
-
-
-
-
 	}
+
+
+
 }

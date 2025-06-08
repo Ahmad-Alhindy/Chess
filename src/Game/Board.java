@@ -35,11 +35,12 @@ public class Board {
 			pWhite.team = Team.WHITE;
 			board[pWhite.yPossition][pWhite.xPossition] = pWhite;	
 			
-			/*Piece pPawnW = new Piece();
+			Piece pPawnW = new Piece();
 			pPawnW.xPossition = i;
 			pPawnW.yPossition = 1;
+			pPawnW.type = "♟";
 			pPawnW.team = Team.WHITE;
-			board[pPawnW.yPossition][pPawnW.xPossition] = p.pawn;	*/
+			board[pPawnW.yPossition][pPawnW.xPossition] = pPawnW;	
 
 			
 			Piece pBlack = new Piece();
@@ -50,12 +51,12 @@ public class Board {
 			board[pBlack.yPossition][pBlack.xPossition] = pBlack;	
 			
 			
-		/*	Piece pPawnB = new Piece(uppDirection);
+			Piece pPawnB = new Piece();
 			pPawnB.xPossition = i;
 			pPawnB.yPossition = 6;
 			pPawnB.type = "♟";
 			pPawnB.team = Team.BLACK;
-			board[pPawnB.yPossition][pPawnB.xPossition] = pPawnB;*/
+			board[pPawnB.yPossition][pPawnB.xPossition] = pPawnB;
 		}
 	    boardPrinter();
 	}
