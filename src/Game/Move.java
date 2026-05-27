@@ -19,7 +19,7 @@ public class Move extends MouseAdapter {
 	Team team = Team.WHITE;
 	private boolean underAttack  = false;
 	private boolean checkingTheKing = false;
-	int teamTurn = 1;
+	int teamTurn = 2;
 	protected Piece selectedPiece = new Piece();
 	List<int[]> legalMove = new ArrayList<>(); 
 
@@ -43,67 +43,39 @@ public class Move extends MouseAdapter {
 		team = (teamTurn % 2 == 0) ? Team.WHITE : Team.BLACK;
 		int clickedRow = e.getY() / height;
 		int clickedCol = e.getX() / width;
-		Piece clickedPiece = this.board.board[clickedRow][clickedCol]; 
-		Team t1 = Team.BLACK;
+		Piece clickedPiece = this.board.board[clickedRow][clickedCol];
+
 		if (clickedPiece != null) {
-			System.out.println("this is the click " + clickedPiece.type);		
-			Team t = board.board[clickedRow][clickedCol].team;
-			t = (t == Team.WHITE) ? Team.BLACK : Team.WHITE;
-			t1 = t;
-		}
-		else {
+			System.out.println("this is the click " + clickedPiece.type);
+		} else {
 			System.out.println("this piece is null");
 		}
-		boolean kingInCheck = checkkingStatuse();
-		int[] kingPos = getKingPosition(team);
-		Piece p = new Piece();
-		p.type = "♚";
-		List<int[]> filteredMoves = new ArrayList<>(kingMoves);
-		filteredMoves.removeIf(move -> !moveSavesKing(move[0], move[1]));
-		kingMoves.clear();
-		kingMoves.addAll(filteredMoves);
-		boolean kingCanMove = !kingMoves.isEmpty();
 
-		if (!kingCanMove) {
-			chessView.showWinner(t1.toString());
-		}
-		if (clickedPiece != null && this.pieceIsSelected == false && clickedPiece.team == team) {
+		if (clickedPiece != null && !this.pieceIsSelected && clickedPiece.team == team) {
 			selectedPiece = clickedPiece;
-			/*System.out.println("clicked piece is not null row" + clickedRow + " column " + clickedCol );*/
-			showLegalMoves(clickedRow, clickedCol, clickedPiece, this.legalMove); 
-			
+			showLegalMoves(clickedRow, clickedCol, clickedPiece, this.legalMove);
 			legalMove.removeIf(move -> !moveSavesKing(move[0], move[1]));
-			
 
 			for (int[] square : legalMove) {
 				chessView.updateSquareColor(square[1], square[0], Color.cyan);
 			}
-
 			legalMove.clear();
-			this.pieceIsSelected = true ;
-			//this.legalMoveForAllPieces.clear();
+			this.pieceIsSelected = true;
 		}
-		else  if (clickedPiece != null && this.pieceIsSelected == true && clickedPiece.team == selectedPiece.team){
+		else if (clickedPiece != null && this.pieceIsSelected && clickedPiece.team == selectedPiece.team) {
 			chessView.isUpdaiting = false;
 			Graphics g = chessBoard.getGraphics();
 			chessBoard.paintComponent(g);
 			this.pieceIsSelected = false;
 		}
-
 		else if (clickedPiece == null && this.pieceIsSelected) {
-
-			if (!kingInCheck || moveSavesKing(clickedRow, clickedCol)) {
-				chessView.isUpdaiting = false;
-				movingPiece(clickedRow, clickedCol);
-			}
+			chessView.isUpdaiting = false;
+			movingPiece(clickedRow, clickedCol);
 			pieceIsSelected = false;
 		}
-		else if(clickedPiece != null && this.pieceIsSelected && clickedPiece.team != selectedPiece.team && clickedPiece.team != team) {
-
-			if (!kingInCheck || moveSavesKing(clickedRow, clickedCol)) {
-				chessView.isUpdaiting = false;
-				movingPiece(clickedRow, clickedCol);
-			}
+		else if (clickedPiece != null && this.pieceIsSelected && clickedPiece.team != selectedPiece.team && clickedPiece.team != team) {
+			chessView.isUpdaiting = false;
+			movingPiece(clickedRow, clickedCol);
 			this.pieceIsSelected = false;
 		}
 	}
@@ -116,15 +88,55 @@ public class Move extends MouseAdapter {
 			board.board[selectedPiece.yPossition][selectedPiece.xPossition] = null;
 			selectedPiece.yPossition = row;
 			selectedPiece.xPossition = col;
-			//board.boardPrinter();
 			Graphics g = chessBoard.getGraphics();
 			chessBoard.paintComponent(g);
-			this.pieceIsSelected = false;		
+			this.pieceIsSelected = false;
 		}
 		else {
 			return;
 		}
-		teamTurn += 1 ;
+		teamTurn += 1;
+		Team nextTeam = (teamTurn % 2 == 0) ? Team.WHITE : Team.BLACK;
+		if (isCheckmate(nextTeam)) {
+			Team winner = (nextTeam == Team.WHITE) ? Team.BLACK : Team.WHITE;
+			chessView.showWinner(winner.toString());
+		}
+	}
+
+	private boolean isCheckmate(Team checkTeam) {
+		Team savedTeam = team;
+		Piece savedSelected = selectedPiece;
+		team = checkTeam;
+
+		boolean inCheck = checkkingStatuse();
+		if (!inCheck) {
+			team = savedTeam;
+			selectedPiece = savedSelected;
+			return false;
+		}
+
+		for (int r = 0; r < board.board.length; r++) {
+			for (int c = 0; c < board.board[r].length; c++) {
+				Piece piece = board.board[r][c];
+				if (piece != null && piece.team == checkTeam) {
+					selectedPiece = piece;
+					List<int[]> moves = new ArrayList<>();
+					showLegalMoves(r, c, piece, moves);
+					final int pieceRow = r, pieceCol = c;
+					moves.removeIf(move -> move[0] == pieceRow && move[1] == pieceCol);
+					moves.removeIf(move -> !moveSavesKing(move[0], move[1]));
+					if (!moves.isEmpty()) {
+						team = savedTeam;
+						selectedPiece = savedSelected;
+						return false;
+					}
+				}
+			}
+		}
+
+		team = savedTeam;
+		selectedPiece = savedSelected;
+		return true;
 	}
 
 	private void checkTheKing() {
@@ -248,11 +260,6 @@ public class Move extends MouseAdapter {
 				}
 				
 			}
-		}
-		Team t = board.board[row][col].team;
-		t = (t == Team.WHITE) ? Team.BLACK : Team.WHITE;
-		if (legalMove.isEmpty()) {
-			chessView.showWinner(t.toString());
 		}
 	}
 
