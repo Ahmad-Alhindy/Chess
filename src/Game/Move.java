@@ -108,6 +108,10 @@ public class Move extends MouseAdapter {
 		Piece savedSelected = selectedPiece;
 		team = checkTeam;
 
+		int[] kingPos = getKingPosition(checkTeam);
+		if (kingPos == null) { team = savedTeam; selectedPiece = savedSelected; return false; }
+		selectedPiece = board.board[kingPos[0]][kingPos[1]];
+
 		boolean inCheck = checkkingStatuse();
 		if (!inCheck) {
 			team = savedTeam;
